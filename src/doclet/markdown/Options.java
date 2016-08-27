@@ -58,7 +58,6 @@ public class Options {
 		case "-subtitle":
 		case "-version":
 		case "-company":
-		case "-copyright":
 			return true;
 		}
 		return false;
