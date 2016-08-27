@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="pandoc">
+	<property name="dir.work" value="work" />
+	<target name="archive">
+		<delete dir="${dir.work}" />
+		<mkdir dir="${dir.work}" />
+		<copy todir="${dir.work}">
+			<fileset dir="bin" includes="doclet/**/*.class" />
+		</copy>
+		<jar destfile="markdowndoclet-1.0.jar" basedir="${dir.work}" />
+	</target>
+	<target name="javadoc" depends="archive">
+		<javadoc access="private" additionalparam="-encoding utf-8" packagenames="doclet.markdown" sourcepath="src">
+			<doclet name="doclet.markdown.MarkdownDoclet" path="markdowndoclet-1.0.jar">
+				<param name="-file" value="document.md" />
+				<param name="-title" value="SUBJECT" />
+				<param name="-subtitle" value="SUBTITLE" />
+				<param name="-version" value="VER 1.0" />
+				<param name="-company" value="XXX PROJECT" />
+				<param name="-copyright" value="COPYRIGHT 2016 XXX ALL RIGHTS RESERVED." />
+			</doclet>
+		</javadoc>
+	</target>
+	<target name="pandoc" depends="javadoc">
+		<exec executable="pandoc" dir=".">
+			<arg line="--toc" />
+			<arg line="--toc-depth=2" />
+			<arg line="--standalone" />
+			<arg line="--reference-docx=reference.docx" />
+			<arg line="-o document.docx" />
+			<arg line="document.md" />
+		</exec>
+	</target>
+</project>
