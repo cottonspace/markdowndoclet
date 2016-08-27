@@ -17,7 +17,6 @@
 				<param name="-subtitle" value="SUBTITLE" />
 				<param name="-version" value="VER 1.0" />
 				<param name="-company" value="XXX PROJECT" />
-				<param name="-copyright" value="COPYRIGHT 2016 XXX ALL RIGHTS RESERVED." />
 			</doclet>
 		</javadoc>
 	</target>
