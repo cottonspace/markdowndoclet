@@ -187,8 +187,20 @@ public class MarkdownBuilder {
 				packages.add(packageDoc);
 			}
 
+			// 種類名
+			String classType;
+			if (classDoc.isInterface()) {
+				classType = "インターフェイス";
+			} else {
+				if (classDoc.isAbstract()) {
+					classType = "抽象クラス";
+				} else {
+					classType = "クラス";
+				}
+			}
+
 			// クラス
-			md.heading2(classDoc.modifiers() + " " + classDoc.name());
+			md.heading2(classDoc.modifiers() + " " + classDoc.name() + " " + classType);
 
 			// パッケージ名
 			md.heading3("パッケージ");
