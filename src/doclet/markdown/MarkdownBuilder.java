@@ -1,5 +1,6 @@
 package doclet.markdown;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,6 +21,9 @@ import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.Tag;
 import com.sun.javadoc.ThrowsTag;
 import com.sun.javadoc.Type;
+
+import doclet.counter.CountInfo;
+import doclet.counter.Counter;
 
 /**
  * Markdown 形式の Javadoc ドキュメントを作成する処理を提供します。
@@ -243,6 +247,15 @@ public class MarkdownBuilder {
 				for (int i = 0; i < versionTags.length; i++) {
 					md.unorderedList(versionTags[i].text());
 				}
+				md.breakElement();
+			}
+
+			// ソースコードファイル情報
+			File source = classDoc.position().file();
+			CountInfo ci = Counter.count(source);
+			if (ci != null) {
+				md.heading3("ファイル");
+				md.unorderedList(source.getName() + " - " + ci.getSteps() + " ステップ " + ci.getLines() + " 行");
 				md.breakElement();
 			}
 

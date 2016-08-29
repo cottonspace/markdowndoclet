@@ -10,7 +10,7 @@
 		<jar destfile="markdowndoclet-1.0.jar" basedir="${dir.work}" />
 	</target>
 	<target name="javadoc" depends="archive">
-		<javadoc access="private" additionalparam="-encoding utf-8" packagenames="doclet.markdown" sourcepath="src">
+		<javadoc access="private" additionalparam="-encoding utf-8" packagenames="doclet.markdown,doclet.counter" sourcepath="src">
 			<doclet name="doclet.markdown.MarkdownDoclet" path="markdowndoclet-1.0.jar">
 				<param name="-file" value="document.md" />
 				<param name="-title" value="SUBJECT" />
