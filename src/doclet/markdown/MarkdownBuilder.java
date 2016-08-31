@@ -466,9 +466,25 @@ public class MarkdownBuilder {
 			Collections.sort(files, new Comparator<File>() {
 				@Override
 				public int compare(File o1, File o2) {
-					return o1.getName().compareTo(o2.getName());
+					return o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
 				}
 			});
+
+			// 全てのファイルに共通する基準パスの抽出
+			File base = files.get(0).getParentFile();
+			while (base != null) {
+				boolean unified = true;
+				for (File file : files) {
+					if (!file.getAbsolutePath().startsWith(base.getAbsolutePath())) {
+						unified = false;
+						break;
+					}
+				}
+				if (unified) {
+					break;
+				}
+				base = base.getParentFile();
+			}
 
 			// ファイル一覧の出力
 			for (File file : files) {
@@ -485,8 +501,14 @@ public class MarkdownBuilder {
 				sumBranks += branks;
 				sumLines += lines;
 
+				// パス名の省略
+				String path = file.getAbsolutePath();
+				if (base != null) {
+					path = path.substring(base.getAbsolutePath().length() + 1);
+				}
+
 				// ファイル情報
-				md.columns(file.getName(), // ファイル
+				md.columns(path.replaceAll("\\\\", "/"), // ファイル
 						String.format("%,d", size), // Bytes
 						String.format("%,d", steps), // ステップ
 						String.format("%,d", branks), // 空白行
