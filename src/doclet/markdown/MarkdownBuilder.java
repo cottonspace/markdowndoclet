@@ -524,7 +524,7 @@ public class MarkdownBuilder {
 				// パス名の省略
 				String path = file.getAbsolutePath();
 				if (base != null) {
-					path = path.substring(base.getAbsolutePath().length() + 1);
+					path = path.substring(base.getAbsolutePath().length());
 				}
 
 				// ファイル情報
