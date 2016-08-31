@@ -7,8 +7,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.ExecutableMemberDoc;
@@ -46,6 +49,11 @@ public class MarkdownBuilder {
 	private List<PackageDoc> packages;
 
 	/**
+	 * ステップカウント結果を記憶するためのマップ
+	 */
+	private Map<File, CountInfo> counts;
+
+	/**
 	 * ドキュメントを生成します。
 	 *
 	 * @param rootDoc
@@ -62,13 +70,19 @@ public class MarkdownBuilder {
 		md = new MarkdownWriter();
 
 		// 表紙を作成
-		makeCover();
+		makeCoverPage();
 
 		// 出力済パッケージリストを初期化
 		packages = new ArrayList<PackageDoc>();
 
+		// ステップカウント結果を初期化
+		counts = new HashMap<File, CountInfo>();
+
 		// 全てのクラスを出力
 		makeClassPages();
+
+		// ステップカウント結果を出力
+		makeCountPage();
 
 		// ファイルに保存
 		md.save(Options.getOption("file", "document.md"));
@@ -77,7 +91,7 @@ public class MarkdownBuilder {
 	/**
 	 * 表紙を作成します。
 	 */
-	private void makeCover() {
+	private void makeCoverPage() {
 
 		// 題名の情報
 		String title = Options.getOption("title");
@@ -258,6 +272,7 @@ public class MarkdownBuilder {
 				md.unorderedList(source.getName() + " - " + ci.getSteps() + " ステップ " + ci.getLines() + " 行");
 				md.breakElement();
 			}
+			counts.put(source, ci);
 
 			// 作成者
 			Tag[] authorTags = classDoc.tags("author");
@@ -423,5 +438,70 @@ public class MarkdownBuilder {
 			// Markdown 要素の終了
 			md.breakElement();
 		}
+	}
+
+	/**
+	 * ステップカウント結果ページを出力します。
+	 */
+	private void makeCountPage() {
+
+		// 合計値の初期化
+		long sumSize = 0;
+		int sumSteps = 0;
+		int sumBranks = 0;
+		int sumLines = 0;
+
+		// パッケージ名
+		md.heading1("ファイル一覧");
+
+		// テーブルヘッダ
+		md.columns("ファイル", "Bytes", "ステップ", "空白行", "行数");
+		md.columns(":-----", "-----:", "-----:", "-----:", "-----:");
+
+		// 対象ファイルが存在する場合
+		if (0 < counts.size()) {
+
+			// ファイルリスト生成
+			List<File> files = new ArrayList<File>(counts.keySet());
+			Collections.sort(files, new Comparator<File>() {
+				@Override
+				public int compare(File o1, File o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+
+			// ファイル一覧の出力
+			for (File file : files) {
+
+				// ファイル情報の出力
+				long size = file.length();
+				int steps = counts.get(file).getSteps();
+				int branks = counts.get(file).getBranks();
+				int lines = counts.get(file).getLines();
+
+				// 合計値の加算
+				sumSize += size;
+				sumSteps += steps;
+				sumBranks += branks;
+				sumLines += lines;
+
+				// ファイル情報
+				md.columns(file.getName(), // ファイル
+						String.format("%,d", size), // Bytes
+						String.format("%,d", steps), // ステップ
+						String.format("%,d", branks), // 空白行
+						String.format("%,d", lines) // 行数
+				);
+			}
+		}
+
+		// 合計行
+		md.columns("合計", // 合計
+				String.format("%,d", sumSize), // Bytes
+				String.format("%,d", sumSteps), // ステップ
+				String.format("%,d", sumBranks), // 空白行
+				String.format("%,d", sumLines) // 行数
+		);
+		md.breakElement();
 	}
 }

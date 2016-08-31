@@ -26,6 +26,7 @@ public class Counter {
 			// カウンタ初期化
 			int lines = 0;
 			int steps = 0;
+			int branks = 0;
 
 			// 行文字列
 			String line;
@@ -46,7 +47,9 @@ public class Counter {
 				line = line.trim();
 
 				// 有効行のカウント
-				if (0 < line.length()) {
+				if (line.length() == 0) {
+					branks++;
+				} else {
 					if (line.startsWith("/*") && line.endsWith("*/")) {
 						comment = false;
 					} else if (line.startsWith("/*")) {
@@ -62,7 +65,7 @@ public class Counter {
 			}
 
 			// カウント結果を返却
-			return new CountInfo(lines, steps);
+			return new CountInfo(lines, steps, branks);
 
 		} catch (IOException e) {
 		} finally {

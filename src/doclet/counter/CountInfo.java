@@ -11,9 +11,14 @@ public class CountInfo {
 	private int lines;
 
 	/**
-	 * コメント行を除いたステップ数
+	 * 有効行の数
 	 */
 	private int steps;
+
+	/**
+	 * 空白行の数
+	 */
+	private int branks;
 
 	/**
 	 * コンストラクタです。
@@ -21,11 +26,14 @@ public class CountInfo {
 	 * @param lines
 	 *            行数
 	 * @param steps
-	 *            ステップ数
+	 *            有効行の数
+	 * @param branks
+	 *            空白行の数
 	 */
-	public CountInfo(int lines, int steps) {
+	public CountInfo(int lines, int steps, int branks) {
 		this.lines = lines;
 		this.steps = steps;
+		this.branks = branks;
 	}
 
 	/**
@@ -48,21 +56,40 @@ public class CountInfo {
 	}
 
 	/**
-	 * ステップ数を取得します。
+	 * 有効行の数を取得します。
 	 *
-	 * @return ステップ数
+	 * @return 有効行の数
 	 */
 	public int getSteps() {
 		return steps;
 	}
 
 	/**
-	 * ステップ数を設定します。
+	 * 有効行の数を設定します。
 	 *
 	 * @param steps
-	 *            ステップ数
+	 *            有効行の数
 	 */
 	public void setSteps(int steps) {
 		this.steps = steps;
+	}
+
+	/**
+	 * 空白行の数を取得します。
+	 *
+	 * @return 空白行の数
+	 */
+	public int getBranks() {
+		return branks;
+	}
+
+	/**
+	 * 空白行の数を設定します。
+	 *
+	 * @param branks
+	 *            空白行の数
+	 */
+	public void setBranks(int branks) {
+		this.branks = branks;
 	}
 }

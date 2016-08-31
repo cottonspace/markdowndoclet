@@ -140,6 +140,22 @@ public class MarkdownWriter {
 	}
 
 	/**
+	 * テーブル行を出力します。
+	 *
+	 * @param cols
+	 *            列の情報
+	 */
+	public void columns(String... cols) {
+		StringBuilder sb = new StringBuilder();
+		sb.append('|');
+		for (int i = 0; i < cols.length; i++) {
+			sb.append(markdown(cols[i]));
+			sb.append('|');
+		}
+		lines.add(sb.toString());
+	}
+
+	/**
 	 * Markdown 要素の終了
 	 */
 	public void breakElement() {
@@ -165,6 +181,9 @@ public class MarkdownWriter {
 		str = Pattern.compile("\\{@link +(.+?) +(.+?)\\}").matcher(str).replaceAll("[$2]($1)");
 		str = Pattern.compile("\\{@link +(.+?)\\}").matcher(str).replaceAll("[$1]($1)");
 		str = Pattern.compile("\\{@code +(.+?)\\}").matcher(str).replaceAll("`$1`");
+
+		// エスケープ
+		str = str.replaceAll("\\\\", "\\\\\\\\");
 
 		// エンティティ参照の復元
 		str = str.replaceAll("&lt;", "<");
