@@ -441,6 +441,26 @@ public class MarkdownBuilder {
 	}
 
 	/**
+	 * 指定したファイルが指定したディレクトリの配下に存在するか検査します。
+	 *
+	 * @param dir
+	 *            ディレクトリ
+	 * @param file
+	 *            ファイル
+	 * @return ディレクトリの配下にファイルが存在する場合は true を返却
+	 */
+	private boolean isIncluded(File dir, File file) {
+		File parent = file.getParentFile();
+		while (parent != null) {
+			if (parent.equals(dir)) {
+				return true;
+			}
+			parent = parent.getParentFile();
+		}
+		return false;
+	}
+
+	/**
 	 * ステップカウント結果ページを出力します。
 	 */
 	private void makeCountPage() {
@@ -475,7 +495,7 @@ public class MarkdownBuilder {
 			while (base != null) {
 				boolean unified = true;
 				for (File file : files) {
-					if (!file.getAbsolutePath().startsWith(base.getAbsolutePath())) {
+					if (!isIncluded(base, file)) {
 						unified = false;
 						break;
 					}
