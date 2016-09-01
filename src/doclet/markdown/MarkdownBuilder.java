@@ -441,31 +441,12 @@ public class MarkdownBuilder {
 	}
 
 	/**
-	 * 指定したファイルが指定したディレクトリの配下に存在するか検査します。
-	 *
-	 * @param dir
-	 *            ディレクトリ
-	 * @param file
-	 *            ファイル
-	 * @return ディレクトリの配下にファイルが存在する場合は true を返却
-	 */
-	private boolean isIncluded(File dir, File file) {
-		File parent = file.getParentFile();
-		while (parent != null) {
-			if (parent.equals(dir)) {
-				return true;
-			}
-			parent = parent.getParentFile();
-		}
-		return false;
-	}
-
-	/**
 	 * ステップカウント結果ページを出力します。
 	 */
 	private void makeCountPage() {
 
 		// 合計値の初期化
+		int count = 0;
 		long sumSize = 0;
 		int sumSteps = 0;
 		int sumBranks = 0;
@@ -475,61 +456,40 @@ public class MarkdownBuilder {
 		md.heading1("ファイル一覧");
 
 		// テーブルヘッダ
-		md.columns("ファイル", "Bytes", "ステップ", "空白行", "行数");
+		md.columns("ファイル", "bytes", "ステップ", "空白行", "行数");
 		md.columns(":-----", "-----:", "-----:", "-----:", "-----:");
 
 		// 対象ファイルが存在する場合
 		if (0 < counts.size()) {
 
-			// ファイルリスト生成
+			// ファイルリスト生成 (ファイル名順)
 			List<File> files = new ArrayList<File>(counts.keySet());
 			Collections.sort(files, new Comparator<File>() {
 				@Override
 				public int compare(File o1, File o2) {
-					return o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
+					return o1.getName().compareTo(o2.getName());
 				}
 			});
-
-			// 全てのファイルに共通する基準パスの抽出
-			File base = files.get(0).getParentFile();
-			while (base != null) {
-				boolean unified = true;
-				for (File file : files) {
-					if (!isIncluded(base, file)) {
-						unified = false;
-						break;
-					}
-				}
-				if (unified) {
-					break;
-				}
-				base = base.getParentFile();
-			}
 
 			// ファイル一覧の出力
 			for (File file : files) {
 
-				// ファイル情報の出力
+				// ファイル情報
 				long size = file.length();
 				int steps = counts.get(file).getSteps();
 				int branks = counts.get(file).getBranks();
 				int lines = counts.get(file).getLines();
 
 				// 合計値の加算
+				count++;
 				sumSize += size;
 				sumSteps += steps;
 				sumBranks += branks;
 				sumLines += lines;
 
-				// パス名の省略
-				String path = file.getAbsolutePath();
-				if (base != null) {
-					path = path.substring(base.getAbsolutePath().length());
-				}
-
 				// ファイル情報
-				md.columns(path.replaceAll("\\\\", "/"), // ファイル
-						String.format("%,d", size), // Bytes
+				md.columns(file.getName(), // ファイル
+						String.format("%,d", size), // サイズ
 						String.format("%,d", steps), // ステップ
 						String.format("%,d", branks), // 空白行
 						String.format("%,d", lines) // 行数
@@ -538,8 +498,8 @@ public class MarkdownBuilder {
 		}
 
 		// 合計行
-		md.columns("合計", // 合計
-				String.format("%,d", sumSize), // Bytes
+		md.columns(String.format("計 %,d ファイル", count), // ファイル数
+				String.format("%,d", sumSize), // サイズ
 				String.format("%,d", sumSteps), // ステップ
 				String.format("%,d", sumBranks), // 空白行
 				String.format("%,d", sumLines) // 行数
