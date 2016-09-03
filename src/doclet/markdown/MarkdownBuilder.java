@@ -452,7 +452,7 @@ public class MarkdownBuilder {
 	 */
 	private String getShortName(Type type) {
 		String name = type.toString();
-		name = name.replaceAll(".+\\.", "");
+		name = name.replaceAll("[a-zA-Z0-9\\-\\_]+\\.", "");
 		return name;
 	}
 
