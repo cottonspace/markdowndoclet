@@ -571,9 +571,9 @@ Javadoc の内容
 |:-----|-----:|-----:|-----:|-----:|
 |CountInfo.java|1,523|29|11|95|
 |Counter.java|1,746|47|16|85|
-|MarkdownBuilder.java|14,056|302|74|525|
+|MarkdownBuilder.java|14,066|302|74|525|
 |MarkdownDoclet.java|1,482|26|5|55|
 |MarkdownWriter.java|5,463|105|21|226|
 |Options.java|1,641|27|5|65|
-|計 6 ファイル|25,911|536|132|1,051|
+|計 6 ファイル|25,921|536|132|1,051|
 
