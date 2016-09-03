@@ -184,6 +184,7 @@ public class MarkdownWriter {
 
 		// エスケープ
 		str = str.replaceAll("\\\\", "\\\\\\\\");
+		str = Pattern.compile("<(.*?)>").matcher(str).replaceAll("\\\\<$1\\\\>");
 
 		// エンティティ参照の復元
 		str = str.replaceAll("&lt;", "<");
