@@ -1,5 +1,6 @@
 # MarkdownDoclet
 Doclet which creates Javadoc as Markdown file.
+Output of this doclet  is optimized for [Pandoc](http://pandoc.org/).
 
 ## Homepage
 
