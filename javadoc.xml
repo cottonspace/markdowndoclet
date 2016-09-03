@@ -12,11 +12,11 @@
 	<target name="javadoc" depends="archive">
 		<javadoc access="private" additionalparam="-encoding utf-8" packagenames="doclet.markdown,doclet.counter" sourcepath="src">
 			<doclet name="doclet.markdown.MarkdownDoclet" path="markdowndoclet-1.0.jar">
-				<param name="-file" value="document.md" />
-				<param name="-title" value="SUBJECT" />
-				<param name="-subtitle" value="SUBTITLE" />
-				<param name="-version" value="VER 1.0" />
-				<param name="-company" value="XXX PROJECT" />
+				<param name="-file" value="sample/document.md" />
+				<param name="-title" value="MarkdownDoclet" />
+				<param name="-subtitle" value="詳細設計書" />
+				<param name="-version" value="1.0" />
+				<param name="-company" value="sample" />
 			</doclet>
 		</javadoc>
 	</target>
@@ -25,9 +25,9 @@
 			<arg line="--toc" />
 			<arg line="--toc-depth=2" />
 			<arg line="--standalone" />
-			<arg line="--reference-docx=reference.docx" />
-			<arg line="-o document.docx" />
-			<arg line="document.md" />
+			<arg line="--reference-docx=sample/reference.docx" />
+			<arg line="-o sample/document.docx" />
+			<arg line="sample/document.md" />
 		</exec>
 	</target>
 </project>

@@ -239,7 +239,7 @@ public class MarkdownBuilder {
 			CountInfo ci = Counter.count(source);
 			if (ci != null) {
 				md.heading3("ファイル");
-				md.unorderedList(source.getName() + " - " + ci.getSteps() + " ステップ " + ci.getLines() + " 行");
+				md.unorderedList(String.format("%s - %,d ステップ %,d 行", source.getName(), ci.getSteps(), ci.getLines()));
 				md.breakElement();
 			}
 			counts.put(source, ci);
