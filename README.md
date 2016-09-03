@@ -10,7 +10,7 @@ Output of this doclet  is optimized for [Pandoc](http://pandoc.org/).
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="pandoc">
+<project default="javadoc">
   <target name="javadoc">
     <javadoc access="private" additionalparam="-encoding utf-8" packagenames="doclet.markdown" sourcepath="src">
       <doclet name="doclet.markdown.MarkdownDoclet" path="markdowndoclet-1.0.jar">
