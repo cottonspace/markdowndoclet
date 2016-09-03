@@ -15,6 +15,7 @@ import java.util.Map;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.ExecutableMemberDoc;
+import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MemberDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
@@ -52,6 +53,11 @@ public class MarkdownBuilder {
 	 * ステップカウント結果を記憶するためのマップ
 	 */
 	private Map<File, CountInfo> counts;
+
+	/**
+	 * コメントが指定されていない場合の表示文字列
+	 */
+	private static final String NO_COMMENT = "説明がありません";
 
 	/**
 	 * ドキュメントを生成します。
@@ -126,18 +132,20 @@ public class MarkdownBuilder {
 	 *
 	 * @param parameters
 	 *            引数の情報
+	 * @param type
+	 *            クラス名を表示する場合
 	 * @return 引数の書式を示した文字列
 	 */
-	private String getParamSignature(Parameter[] parameters) {
+	private String getParamSignature(Parameter[] parameters, boolean type) {
 		StringBuilder sb = new StringBuilder();
 		for (Parameter parameter : parameters) {
 			if (0 < sb.length()) {
 				sb.append(", ");
 			}
-			String type = parameter.type().toString();
-			type = type.replaceAll("java\\.(lang|util|io|nio)\\.", "");
-			sb.append(type);
-			sb.append(" ");
+			if (type) {
+				sb.append(getShortName(parameter.type()));
+				sb.append(" ");
+			}
 			sb.append(parameter.name());
 		}
 		return sb.toString();
@@ -197,9 +205,7 @@ public class MarkdownBuilder {
 				md.heading1(packageDoc.name() + " パッケージ");
 
 				// パッケージ説明
-				if (!packageDoc.commentText().isEmpty()) {
-					print(packageDoc.commentText());
-				}
+				print(getText(packageDoc.commentText(), NO_COMMENT));
 
 				// 出力済パッケージに追加
 				packages.add(packageDoc);
@@ -220,10 +226,23 @@ public class MarkdownBuilder {
 			// クラス
 			md.heading2(classDoc.modifiers() + " " + classDoc.name() + " " + classType);
 
+			// クラス説明
+			print(getText(classDoc.commentText(), NO_COMMENT));
+
 			// パッケージ名
 			md.heading3("パッケージ");
 			md.unorderedList(classDoc.containingPackage().name());
 			md.breakElement();
+
+			// ソースコードファイル情報
+			File source = classDoc.position().file();
+			CountInfo ci = Counter.count(source);
+			if (ci != null) {
+				md.heading3("ファイル");
+				md.unorderedList(source.getName() + " - " + ci.getSteps() + " ステップ " + ci.getLines() + " 行");
+				md.breakElement();
+			}
+			counts.put(source, ci);
 
 			// 継承階層
 			List<ClassDoc> classDocs = new ArrayList<ClassDoc>();
@@ -251,9 +270,6 @@ public class MarkdownBuilder {
 				md.breakElement();
 			}
 
-			// クラス説明
-			print(classDoc.commentText());
-
 			// バージョン
 			Tag[] versionTags = classDoc.tags("version");
 			if (0 < versionTags.length) {
@@ -263,16 +279,6 @@ public class MarkdownBuilder {
 				}
 				md.breakElement();
 			}
-
-			// ソースコードファイル情報
-			File source = classDoc.position().file();
-			CountInfo ci = Counter.count(source);
-			if (ci != null) {
-				md.heading3("ファイル");
-				md.unorderedList(source.getName() + " - " + ci.getSteps() + " ステップ " + ci.getLines() + " 行");
-				md.breakElement();
-			}
-			counts.put(source, ci);
 
 			// 作成者
 			Tag[] authorTags = classDoc.tags("author");
@@ -286,7 +292,7 @@ public class MarkdownBuilder {
 
 			// 全ての定数
 			if (0 < classDoc.enumConstants().length) {
-				md.heading3("定数の詳細");
+				md.heading4("定数の詳細");
 				for (int i = 0; i < classDoc.enumConstants().length; i++) {
 					writeFieldDoc(classDoc.enumConstants()[i]);
 				}
@@ -294,26 +300,20 @@ public class MarkdownBuilder {
 
 			// 全てのフィールド
 			if (0 < classDoc.fields().length) {
-				md.heading3("フィールドの詳細");
+				md.heading4("フィールドの詳細");
 				for (int i = 0; i < classDoc.fields().length; i++) {
 					writeFieldDoc(classDoc.fields()[i]);
 				}
 			}
 
 			// 全てのコンストラクタ
-			if (0 < classDoc.constructors().length) {
-				md.heading3("コンストラクタの詳細");
-				for (int i = 0; i < classDoc.constructors().length; i++) {
-					writeMemberDoc(classDoc.constructors()[i]);
-				}
+			for (int i = 0; i < classDoc.constructors().length; i++) {
+				writeMemberDoc(classDoc.constructors()[i]);
 			}
 
 			// 全てのメソッド
-			if (0 < classDoc.methods().length) {
-				md.heading3("メソッドの詳細");
-				for (int i = 0; i < classDoc.methods().length; i++) {
-					writeMemberDoc(classDoc.methods()[i]);
-				}
+			for (int i = 0; i < classDoc.methods().length; i++) {
+				writeMemberDoc(classDoc.methods()[i]);
 			}
 		}
 	}
@@ -337,10 +337,8 @@ public class MarkdownBuilder {
 		}
 
 		// フィールド情報
-		md.heading4(doc.modifiers() + " " + doc.name() + " " + fieldType);
-		if (!doc.commentText().isEmpty()) {
-			print(doc.commentText());
-		}
+		md.heading5(doc.modifiers() + " " + getShortName(((FieldDoc) doc).type()) + " " + doc.name() + " " + fieldType);
+		print(getText(doc.commentText(), NO_COMMENT));
 	}
 
 	/**
@@ -350,9 +348,6 @@ public class MarkdownBuilder {
 	 *            実行可能メンバの情報
 	 */
 	private void writeMemberDoc(ExecutableMemberDoc doc) {
-
-		// 出力文字
-		String str;
 
 		// 種類名
 		String memberType;
@@ -365,27 +360,20 @@ public class MarkdownBuilder {
 		}
 
 		// メソッド情報
-		md.heading4(doc.name() + " " + memberType);
-		if (!doc.commentText().isEmpty()) {
-			print(doc.commentText());
-		}
-		md.heading5("形式");
-		str = doc.modifiers();
+		String str = doc.modifiers();
 		if (doc instanceof MethodDoc) {
-			MethodDoc method = (MethodDoc) doc;
-			str += " " + method.returnType().simpleTypeName();
+			str += " " + getShortName(((MethodDoc) doc).returnType());
 		}
-		str += " " + doc.name();
-		str += " (" + getParamSignature(doc.parameters()) + ")";
-		print(str);
+		str += " " + doc.name() + " (" + getParamSignature(doc.parameters(), false) + ") " + memberType;
+		md.heading4(str);
+		print(getText(doc.commentText(), NO_COMMENT));
 
 		// パラメータ
 		Parameter[] parameters = doc.parameters();
 		if (0 < parameters.length) {
-			md.heading5("パラメータ");
 			for (int i = 0; i < parameters.length; i++) {
-				str = parameters[i].name();
-				md.definition(str, getParamComment(doc.paramTags(), parameters[i].name()));
+				md.heading5(getShortName(parameters[i].type()) + " " + parameters[i].name() + " パラメータ");
+				print(getText(getParamComment(doc.paramTags(), parameters[i].name()), NO_COMMENT));
 			}
 		}
 
@@ -394,8 +382,7 @@ public class MarkdownBuilder {
 			MethodDoc method = (MethodDoc) doc;
 			if (0 < method.tags("return").length) {
 				md.heading5("戻り値");
-				str = method.returnType().simpleTypeName();
-				md.definition(str, method.tags("return")[0].text());
+				print(method.tags("return")[0].text());
 			}
 		}
 
@@ -404,8 +391,8 @@ public class MarkdownBuilder {
 		if (0 < exceptions.length) {
 			md.heading5("例外");
 			for (int i = 0; i < exceptions.length; i++) {
-				str = exceptions[i].simpleTypeName();
-				md.definition(str, getThrowsComment(doc.throwsTags(), exceptions[i].typeName()));
+				md.definition(getShortName(exceptions[i]),
+						getText(getThrowsComment(doc.throwsTags(), exceptions[i].typeName()), NO_COMMENT));
 			}
 		}
 	}
@@ -438,6 +425,35 @@ public class MarkdownBuilder {
 			// Markdown 要素の終了
 			md.breakElement();
 		}
+	}
+
+	/**
+	 * 指定された文字列が空の場合はデフォルト文字列を返します。
+	 *
+	 * @param str
+	 *            文字列
+	 * @param def
+	 *            デフォルト文字列
+	 * @return 選択された文字列
+	 */
+	private String getText(String str, String def) {
+		if (str == null || str.isEmpty()) {
+			return def;
+		}
+		return str;
+	}
+
+	/**
+	 * クラス名からパッケージ名を除去します。
+	 *
+	 * @param type
+	 *            クラス
+	 * @return 省略したクラス名
+	 */
+	private String getShortName(Type type) {
+		String name = type.toString();
+		name = name.replaceAll(".+\\.", "");
+		return name;
 	}
 
 	/**
