@@ -2,10 +2,6 @@
 Doclet which creates Javadoc as Markdown file.
 Output of this doclet  is optimized for [Pandoc](http://pandoc.org/).
 
-## Homepage
-
-[http://www.csync.net/blog/pc/markdowndoclet/](http://www.csync.net/blog/pc/markdowndoclet/)
-
 ## How to use as Ant task
 
 ```xml
